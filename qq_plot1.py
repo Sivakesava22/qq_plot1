@@ -14,12 +14,22 @@ logger = logging.getLogger("qq_plot")
 
 app = Flask(__name__)
 
+# -------------------------------------------------------
+# ✅ Health Check Route (FAST)
+# -------------------------------------------------------
 @app.route("/")
+def health():
+    return "QQ Plot Service is running"
+
+
+# -------------------------------------------------------
+# ✅ QQ Plot Route (Heavy Processing)
+# -------------------------------------------------------
+@app.route("/qqplot")
 def generate_qq_plot():
     try:
         bq_client = bigquery.Client()
 
-        # ✅ FINAL CLEAN QUERY
         query = """
         SELECT
             subtype,
@@ -49,7 +59,7 @@ def generate_qq_plot():
             "JIS": "#2ca02c"
         }
 
-        # Plot each subtype separately
+        # Plot each subtype
         for subtype in ["AIS", "IIS", "JIS"]:
             sub_df = df[df["subtype"] == subtype]
 
@@ -102,9 +112,13 @@ def generate_qq_plot():
         return send_file(tmp.name, mimetype="text/html")
 
     except Exception:
+        logger.exception("Error generating QQ plot")
         return Response(traceback.format_exc(), mimetype="text/plain", status=500)
 
 
+# -------------------------------------------------------
+# ✅ Required for local testing (Cloud Run uses gunicorn)
+# -------------------------------------------------------
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port)
