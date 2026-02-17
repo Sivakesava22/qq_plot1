@@ -1,3 +1,4 @@
+fastapi
 flask
 google-cloud-bigquery
 google-cloud-bigquery-storage
@@ -6,3 +7,4 @@ plotly
 gunicorn
 pyarrow
 db-dtypes
+uvicorn
