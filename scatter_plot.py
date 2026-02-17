@@ -11,6 +11,7 @@ client = bigquery.Client(project="shc-variants")
 
 @app.get("/", response_class=HTMLResponse)
 def scatter_plot():
+    return "<h1>Service Working</h1>"
 
     query = """
     WITH annotations_dedup AS (
