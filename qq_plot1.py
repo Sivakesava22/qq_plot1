@@ -42,6 +42,7 @@ def generate_qq_plot():
           AND percent_diff IS NOT NULL
           AND control_percent >= 0
           AND (control_percent + percent_diff) >= 0
+          QUALIFY ROW_NUMBER() OVER (PARTITION BY subtype ORDER BY RAND()) <= 20000
         """
 
         df = bq_client.query(query).to_dataframe()
