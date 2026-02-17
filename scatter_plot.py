@@ -1,17 +1,15 @@
-import pandas as pd
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 from google.cloud import bigquery
+import pandas as pd
 import plotly.express as px
 
-app = FastAPI(title="Genomic Scatter Plot Service")
-
-client = bigquery.Client(project="shc-variants")
-
+app = FastAPI()
 
 @app.get("/", response_class=HTMLResponse)
 def scatter_plot():
-    return "<h1>Service Working</h1>"
+
+    client = bigquery.Client()
 
     query = """
     WITH annotations_dedup AS (
@@ -46,30 +44,17 @@ def scatter_plot():
     FROM annotations_dedup a
     INNER JOIN `shc-variants.igg_dev.compare_subtype_control_clean` c
     ON a.ID = c.id
-    WHERE RAND() < 0.05      -- 5% sampling (important)
-    LIMIT 100000             -- safety cap
     """
 
-    # Run BigQuery
     df = client.query(query).to_dataframe()
 
-    # Remove missing values
-    df = df.dropna(subset=["af", "gnomad_af"])
-
-    # Create scatter plot
     fig = px.scatter(
         df,
         x="af",
         y="gnomad_af",
         color="subtype",
-        hover_data=["symbol", "consequence", "variant_class"],
+        hover_data=["ID", "symbol", "mean_diff"],
         title="AF vs gnomAD AF Scatter Plot"
     )
 
-    fig.update_layout(
-        xaxis_title="Case AF",
-        yaxis_title="gnomAD AF",
-        height=700
-    )
-
-    return fig.to_html(full_html=True)
+    return fig.to_html()
