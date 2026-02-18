@@ -9,4 +9,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-CMD exec gunicorn --bind :$PORT --workers 1 --threads 8 qq_plot1:app
+CMD exec gunicorn --bind :$PORT --workers 1 --threads 8 scatter_plot:app
